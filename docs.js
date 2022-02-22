@@ -2,8 +2,14 @@ const mdtable = require('mdtable');
 const { readFileSync, writeFileSync } = require('fs');
 
 module.exports.generateDocs = (commands) => {
-
-    const readme = readFileSync('./README.md', 'utf-8');
+    
+    let readme = `### Commands\n| |\n`;
+    try {
+        readme = readFileSync('./README.md', 'utf-8');
+    }
+    catch (err) {
+        console.error(err);
+    }
     const aboveTable = readme.split('| ').shift();
     const belowTable = readme.split(' |').pop();
 
