@@ -37,7 +37,6 @@ function initModules() {
 }
 
 client.modules = [];
-client._ROOTDIR = __dirname;
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);

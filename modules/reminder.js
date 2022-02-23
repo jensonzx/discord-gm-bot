@@ -2,7 +2,7 @@ const schedule = require('node-schedule');
 const path = require('path');
 const { readFileSync, writeFileSync, existsSync } = require('fs');
 
-const REMINDERS_FILE_LOCATION = path.join(client._ROOTDIR, 'data', 'reminders.json');
+const REMINDERS_FILE_LOCATION = path.join(__dirname, path.normalize('../data/reminders.json'));
 const REMINDER_CHANNEL_ID = process.env.REMINDER_CHANNEL_ID;
 
 /**
@@ -26,6 +26,8 @@ const getCachedReminders = function() {
 
 module.exports = class ReminderManager {
     constructor() {
+        this.runningReminders = [];
+
         try {
             const cachedReminder = getCachedReminders();
 
@@ -33,17 +35,14 @@ module.exports = class ReminderManager {
                 for (let reminder of cachedReminder) {
                     this.runReminder(reminder.frequency, new Date(reminder.dateTime), reminder.message);
                 }
+
+                console.log(`${this.runningReminders.length} reminder(s) running...`);
             }
         }
         catch (err) {
             console.error({message: 'An error occured while retrieving the JSON file', error: err});
         }
     }
-
-    /**
-     * @type {Array<Reminder>}
-     */
-    #runningReminders = [];
 
     /**
      * 
@@ -108,7 +107,7 @@ module.exports = class ReminderManager {
                 throw new Error('Invalid frequency!');
         }
     
-        this.#runningReminders.push(job);
+        this.runningReminders.push(job);
     }
 }
 
