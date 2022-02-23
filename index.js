@@ -6,7 +6,6 @@ const { generateDocs } = require('./docs');
 const { readdirSync } = require('fs');
 
 dotenv.config();
-global._ROOTDIR = __dirname;
 
 const client = new Client({
     intents: [
@@ -20,15 +19,14 @@ const creator = new SlashCreator({
   token: process.env.DISCORD_CLIENT_TOKEN,
 });
 
-const initModules = function() {
-    const files = readdirSync(path.join(__dirname, 'modules'));
-
+function initModules() {
     try {
-        for (let file of files) {
-            if (file.endsWith('.js')) {
-                // Call initialize function for each module
-                require(path.join(__dirname, 'modules', file)).initialize();
-            }
+        const fileNames = readdirSync(path.join(__dirname, 'modules'));
+        const modules = fileNames.filter(fileName => fileName.endsWith('.js'))
+                            .map(fileName => new (require(path.join(__dirname, 'modules', fileName)))());
+
+        for (let module of modules) {
+            client.modules.push(module)
         }
     }
     catch (err) {
@@ -37,6 +35,9 @@ const initModules = function() {
         throw new Error('Each module must have an initialize() function!');
     }
 }
+
+client.modules = [];
+client._ROOTDIR = __dirname;
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);

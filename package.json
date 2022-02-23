@@ -4,10 +4,10 @@
   "description": "Discord bot made for Grand Masters server",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Jenson",
+  "author": "jensonz",
   "license": "ISC",
   "dependencies": {
     "discord.js": "^13.6.0",
@@ -16,5 +16,17 @@
     "node-schedule": "^2.1.0",
     "path": "^0.12.7",
     "slash-create": "^5.2.1"
-  }
+  },
+  "devDependencies": {
+    "node": "^16.13.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jensonzx/discord-gm-bot.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/jensonzx/discord-gm-bot/issues"
+  },
+  "homepage": "https://github.com/jensonzx/discord-gm-bot#readme"
 }

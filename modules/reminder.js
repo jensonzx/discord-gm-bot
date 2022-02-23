@@ -1,8 +1,8 @@
 const schedule = require('node-schedule');
 const path = require('path');
-const { readFileSync, writeFileSync } = require('fs');
+const { readFileSync, writeFileSync, existsSync } = require('fs');
 
-const REMINDERS_FILE_LOCATION = path.join(_ROOTDIR, 'data', 'reminders.json');
+const REMINDERS_FILE_LOCATION = path.join(client._ROOTDIR, 'data', 'reminders.json');
 const REMINDER_CHANNEL_ID = process.env.REMINDER_CHANNEL_ID;
 
 /**
@@ -10,16 +10,12 @@ const REMINDER_CHANNEL_ID = process.env.REMINDER_CHANNEL_ID;
  * @returns {Array<Reminder>} List of reminders
  */
 const getCachedReminders = function() {
-    let remindersFile = undefined;
-    try {
-        remindersFile = readFileSync(REMINDERS_FILE_LOCATION);
-    }
-    catch (err)
-    {
-        console.error(err);
+    if (!existsSync(REMINDERS_FILE_LOCATION)) {
+        console.log('Cached reminders file does not exist');
         return;
     }
 
+    const remindersFile = readFileSync(REMINDERS_FILE_LOCATION);
     const reminders = JSON.parse(remindersFile);
     
     if (!reminders instanceof Array)
@@ -30,27 +26,13 @@ const getCachedReminders = function() {
 
 module.exports = class ReminderManager {
     constructor() {
-        if (this instanceof ReminderManager) {
-            throw Error('A static class cannot be instantiated.');
-        }
-    }
-
-    /**
-     * @type {Array<Reminder>}
-     */
-    static #runningReminders = [];
-
-    static async initialize() {
         try {
             const cachedReminder = getCachedReminders();
 
             if (cachedReminder) {
                 for (let reminder of cachedReminder) {
-                    ReminderManager.runReminder(reminder.frequency, new Date(reminder.dateTime), reminder.message);
+                    this.runReminder(reminder.frequency, new Date(reminder.dateTime), reminder.message);
                 }
-            }
-            else {
-                console.log('Cached reminders file does not exist');
             }
         }
         catch (err) {
@@ -59,14 +41,19 @@ module.exports = class ReminderManager {
     }
 
     /**
+     * @type {Array<Reminder>}
+     */
+    #runningReminders = [];
+
+    /**
      * 
      * @param {Date} dateTime 
      * @param {string} frequency 
      * @param {string} message 
      */
-    static async addReminder(dateTime, frequency, message) {
+    addReminder(dateTime, frequency, message) {
         
-        ReminderManager.runReminder(frequency, dateTime, message);
+        this.runReminder(frequency, dateTime, message);
 
         try {
             const reminder = new Reminder(dateTime, frequency, message);
@@ -81,11 +68,11 @@ module.exports = class ReminderManager {
         }
     }
 
-    static async removeReminder() {
+    removeReminder() {
         // TODO: unschedule reminder and update json file
     }
 
-    static async listReminders() {
+    listReminders() {
         // TODO
     }
 
@@ -95,7 +82,7 @@ module.exports = class ReminderManager {
      * @param {string} frequency 
      * @param {string} message 
      */
-    static runReminder(frequency, dateTime, message) {
+    runReminder(frequency, dateTime, message) {
         const { client } = require('..');
         let job = undefined;
     
@@ -121,7 +108,7 @@ module.exports = class ReminderManager {
                 throw new Error('Invalid frequency!');
         }
     
-        ReminderManager.#runningReminders.push(job);
+        this.#runningReminders.push(job);
     }
 }
 
